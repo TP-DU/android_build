@@ -876,6 +876,12 @@ endif
 RECOVERY_RESOURCE_ZIP := $(TARGET_OUT)/etc/recovery-resource.dat
 RECOVERY_PATCH_INSTALL := $(TARGET_OUT)/bin/install-recovery.sh
 
+ifndef TARGET_RELEASETOOL_MAKE_RECOVERY_PATCH_SCRIPT
+make_recovery_patch_script := ./build/tools/releasetools/make_recovery_patch
+else
+make_recovery_patch_script := $(TARGET_RELEASETOOL_MAKE_RECOVERY_PATCH_SCRIPT)
+endif
+
 ifeq ($(recovery_resources_private),)
   $(info No private recovery resources for TARGET_DEVICE $(TARGET_DEVICE))
 endif
@@ -1048,12 +1054,11 @@ endif
 	$(call generate-userimage-prop-dictionary, $(ota_temp_root)/META/misc_info.txt)
 	$(hide) cp -r $(PRODUCT_OUT)/boot.img $(ota_temp_root)/BOOTABLE_IMAGES/
 	$(hide) cp -r $(PRODUCT_OUT)/recovery.img $(ota_temp_root)/BOOTABLE_IMAGES/
-	$(hide) ./build/tools/releasetools/make_recovery_patch $(ota_temp_root) $(ota_temp_root)
+	$(hide) $(make_recovery_patch_script) $(ota_temp_root) $(ota_temp_root)
 	$(hide) rm -f $(TARGET_OUT)/bin/install-recovery.sh
 	$(hide) rm -f $(TARGET_OUT)/recovery-from-boot.p
 	$(hide) cp $(ota_temp_root)/SYSTEM/bin/install-recovery.sh $(TARGET_OUT)/bin/install-recovery.sh
 	$(hide) cp $(ota_temp_root)/SYSTEM/recovery-from-boot.p $(TARGET_OUT)/recovery-from-boot.p
-
 $(RECOVERY_RESOURCE_ZIP): $(INSTALLED_RECOVERYIMAGE_TARGET)
 	$(hide) mkdir -p $(dir $@)
 	$(hide) find $(TARGET_RECOVERY_ROOT_OUT)/res -type f | sort | zip -0qrj $@ -@
@@ -1748,7 +1753,7 @@ endif
 	$(call generate-userimage-prop-dictionary, $(zip_root)/META/misc_info.txt)
 ifeq ($(TARGET_RELEASETOOL_MAKE_RECOVERY_PATCH_SCRIPT),)
 	$(hide) PATH=$(foreach p,$(INTERNAL_USERIMAGES_BINARY_PATHS),$(p):)$$PATH MKBOOTIMG=$(MKBOOTIMG) \
-	    ./build/tools/releasetools/make_recovery_patch $(zip_root) $(zip_root)
+	    $(make_recovery_patch_script) $(zip_root) $(zip_root)
 else
         $(hide) PATH=$(foreach p,$(INTERNAL_USERIMAGES_BINARY_PATHS),$(p):)$$PATH MKBOOTIMG=$(MKBOOTIMG) \
 	$(hide) $(TARGET_RELEASETOOL_MAKE_RECOVERY_PATCH_SCRIPT) $(zip_root) $(zip_root)
