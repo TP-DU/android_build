@@ -59,7 +59,11 @@ ifeq ($(BOARD_USES_QCOM_HARDWARE),true)
         ifneq ($(filter msm8992 msm8994,$(TARGET_BOARD_PLATFORM)),)
             QCOM_HARDWARE_VARIANT := msm8994
         else
-            QCOM_HARDWARE_VARIANT := $(TARGET_BOARD_PLATFORM)
+        ifneq ($(filter msm7x30 msm8660 msm8960,$(TARGET_BOARD_PLATFORM)),)
+            QCOM_HARDWARE_VARIANT := msm8960
+        else
+        QCOM_HARDWARE_VARIANT := $(TARGET_BOARD_PLATFORM)
+        endif
         endif
         endif
         endif
